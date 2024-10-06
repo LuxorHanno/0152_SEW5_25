@@ -2,7 +2,11 @@ __author__ = "Hanno Postl"
 __version__ = "1.0"
 __status__ = "Finished"
 
+import logging
+import pickle
 import random
+import argparse
+from pathlib import Path
 from sqlite3 import enable_callback_tracebacks
 from sys import byteorder
 
@@ -57,7 +61,6 @@ def file2ints(filename, bytelength):
     """
     with open(filename, "rb") as file:
         while (byte := file.read(bytelength)):
-            print(byte)
             yield int.from_bytes(byte, byteorder="big")
 
 
@@ -69,7 +72,8 @@ def ints2file(filename, ints, bytelength):
     """
     with open(filename, "ab") as file:
         for i in ints:
-            file.write(i.to_bytes(bytelength, byteorder="big"))
+            byte_data = i.to_bytes(bytelength, byteorder="big").lstrip(b'\x00')
+            file.write(byte_data)
 
 def encryptFile(clearfile, cryptfile, public_key):
     """
@@ -92,17 +96,75 @@ def decryptFile(cryptfile, clearfile, private_key):
     """
     with open(clearfile, "w") as file:
         file.write("")
-    for i in file2ints(cryptfile, private_key[1].bit_length() // 8 +1):
+    for i in file2ints(cryptfile, private_key[1].bit_length() // 8 + 1):
         ints2file(clearfile, [pow(i, private_key[0], private_key[1])], private_key[1].bit_length() // 8)
 
-if __name__ == "__main__":
-    private, public, = generate_keys(128)
 
-    encryptFile("Plain.txt", "Encrypted.txt", public)
-    decryptFile("Encrypted.txt", "Decrypted.txt", private)
+def save_key(key, filename):
     """
-    print(private)
-    print(public)
-    f = file2ints("Plain.txt", public[1])
-    ints2file("Encrypted.txt", f, public[1])
+    Save the RSA key to a file.
     """
+    with open(filename, 'wb') as f:
+        pickle.dump(key, f)
+
+def load_key(filename):
+    """
+    Load the RSA key from a file.
+    """
+    with open(filename, 'rb') as f:
+        return pickle.load(f)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="RSA Encryption/Decryption Tool")
+
+    parser.add_argument("-v", "--verbosity", help="increase output verbosity", action="store_true")
+
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("-k", "--keygen", help="generate new RSA keys with the given bit length", type=int)
+    group.add_argument("-e", "--encrypt", help="encrypt a file")
+    group.add_argument("-d", "--decrypt", help="decrypt a file")
+
+    args = parser.parse_args()
+
+    if args.verbosity:
+        logging.basicConfig(level=logging.INFO)
+        logging.info("Verbosity turned on")
+
+    # Key generation
+    if args.keygen:
+        logging.info(f"Generating RSA keys of length {args.keygen} bits...")
+        private_key, public_key = generate_keys(args.keygen)
+
+        # Save the keys
+        save_key(private_key, 'private_key.pem')
+        save_key(public_key, 'public_key.pem')
+        logging.info(f"Keys saved to 'private_key.pem' and 'public_key.pem'.")
+
+    # File encryption
+    elif args.encrypt:
+        logging.info(f"Encrypting file: {args.encrypt}")
+        if not Path("public_key.pem").is_file():
+            logging.error("Public key not found. Please generate keys first.")
+            return
+
+        public_key = load_key('public_key.pem')
+        output_file = args.encrypt + ".enc"
+        encryptFile(args.encrypt, output_file, public_key)
+        logging.info(f"File encrypted to: {output_file}")
+
+    # File decryption
+    elif args.decrypt:
+        logging.info(f"Decrypting file: {args.decrypt}")
+        if not Path("private_key.pem").is_file():
+            logging.error("Private key not found. Please generate keys first.")
+            return
+
+        private_key = load_key('private_key.pem')
+        output_file = args.decrypt.replace(".enc", "")  # Removing the .enc extension
+        decryptFile(args.decrypt, output_file, private_key)
+        logging.info(f"File decrypted to: {output_file}")
+
+
+if __name__ == "__main__":
+    main()
