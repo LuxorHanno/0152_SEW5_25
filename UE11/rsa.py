@@ -75,7 +75,7 @@ def ints2file(filename, ints, bytelength):
     """
     with open(filename, "ab") as file:
         for i in ints:
-            byte_data = i.to_bytes(bytelength, byteorder="big").lstrip(b'\x00')
+            byte_data = i.to_bytes(bytelength, byteorder="big")
             file.write(byte_data)
 
 def encryptFile(clearfile, cryptfile, public_key):
@@ -87,8 +87,9 @@ def encryptFile(clearfile, cryptfile, public_key):
     """
     with open(cryptfile, "w") as file:
         file.write("")
+    remove_null_characters(clearfile)
     for i in file2ints(clearfile, public_key[1].bit_length() // 8):
-        ints2file(cryptfile, [pow(i, public_key[0], public_key[1])], public_key[1].bit_length() // 8 + 2)
+        ints2file(cryptfile, [pow(i, public_key[0], public_key[1])], public_key[1].bit_length() // 8)
 
 def decryptFile(cryptfile, clearfile, private_key):
     """
@@ -98,17 +99,25 @@ def decryptFile(cryptfile, clearfile, private_key):
     :return: The encrypted message.
 
     >>> private, public = generate_keys(1024)
-    >>> encryptFile("test.txt", "test.enc", public)
-    >>> decryptFile("test.enc", "testd.txt", private)
-    >>> with open("test.txt", "rb") as f1, open("testd.txt", "rb") as f2:
+    >>> encryptFile("Plain.txt", "Plain.enc", public)
+    >>> decryptFile("Plain.enc", "Plaind.txt", private)
+    >>> with open("Plain.txt", "rb") as f1, open("Plaind.txt", "rb") as f2:
     ...     assert f1.read() == f2.read()
-
-
     """
     with open(clearfile, "w") as file:
         file.write("")
-    for i in file2ints(cryptfile, private_key[1].bit_length() // 8 + 2):
+    for i in file2ints(cryptfile, private_key[1].bit_length() // 8):
         ints2file(clearfile, [pow(i, private_key[0], private_key[1])], private_key[1].bit_length() // 8)
+    remove_null_characters(clearfile)
+
+
+def remove_null_characters(file_path):
+    with open(file_path, 'r', encoding='utf-8', errors='ignore') as file:
+        content = file.read()
+    cleaned_content = content.replace('\0', '')
+
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.write(cleaned_content)
 
 
 def save_key(key, filename):
@@ -178,4 +187,4 @@ def main():
 
 
 #if __name__ == "__main__":
-#    main()
+    #main()
