@@ -7,16 +7,19 @@ import pickle
 import random
 import argparse
 from pathlib import Path
-from sqlite3 import enable_callback_tracebacks
-from sys import byteorder
-
-from ansible_collections.community.general.plugins.modules.sensu_silence import clear
-from ansible_collections.dellemc.openmanage.plugins.modules.ome_application_certificate import read_file
-
 import miller_rabin
 
 
 def ggt(x: int, y: int) -> int:
+    """
+    Calculate the greatest common divisor of two numbers.
+    :param x: Number 1
+    :param y: Number 2
+    :return: GGT of x and y
+
+    >>> ggt(123456789, 987654321)
+    9
+    """
     while y != 0:
         x, y = y, x % y
     return x
@@ -85,7 +88,7 @@ def encryptFile(clearfile, cryptfile, public_key):
     with open(cryptfile, "w") as file:
         file.write("")
     for i in file2ints(clearfile, public_key[1].bit_length() // 8):
-        ints2file(cryptfile, [pow(i, public_key[0], public_key[1])], public_key[1].bit_length() // 8 + 1)
+        ints2file(cryptfile, [pow(i, public_key[0], public_key[1])], public_key[1].bit_length() // 8 + 2)
 
 def decryptFile(cryptfile, clearfile, private_key):
     """
@@ -93,10 +96,18 @@ def decryptFile(cryptfile, clearfile, private_key):
     :param m: The message to encrypt.
     :param public_key: The public key.
     :return: The encrypted message.
+
+    >>> private, public = generate_keys(1024)
+    >>> encryptFile("test.txt", "test.enc", public)
+    >>> decryptFile("test.enc", "testd.txt", private)
+    >>> with open("test.txt", "rb") as f1, open("testd.txt", "rb") as f2:
+    ...     assert f1.read() == f2.read()
+
+
     """
     with open(clearfile, "w") as file:
         file.write("")
-    for i in file2ints(cryptfile, private_key[1].bit_length() // 8 + 1):
+    for i in file2ints(cryptfile, private_key[1].bit_length() // 8 + 2):
         ints2file(clearfile, [pow(i, private_key[0], private_key[1])], private_key[1].bit_length() // 8)
 
 
@@ -166,5 +177,5 @@ def main():
         logging.info(f"File decrypted to: {output_file}")
 
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()
