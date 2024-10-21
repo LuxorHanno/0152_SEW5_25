@@ -1,6 +1,6 @@
 __author__ = "Hanno Postl"
-__version__ = "1.0"
-__status__ = "work in progress"
+__version__ = "1.1"
+__status__ = "finished"
 
 
 import matplotlib.pyplot as plt
@@ -29,8 +29,8 @@ if __name__ == "__main__":
     plt.xticks([-PI, -PI / 2, 0, PI / 2, PI],
                [r'$-\pi$', r'$-\pi/2$', r'$0$', r'$+\pi/2$', r'$+\pi$'])
 
-    plt.plot(X, C, color="green", linewidth=2.5, linestyle="-", label="Cosinus")
-    plt.plot(X, S, color="red", linewidth=2.5, linestyle="-", label="Sinus")
+    plt.plot(X, C, color="green", linewidth=2.5, linestyle=":", label="Cosinus")
+    plt.plot(X, S, color="red", linewidth=2.5, linestyle="-.", label="Sinus")
     plt.legend(loc='upper left', frameon=False)
 
     ax = plt.gca()

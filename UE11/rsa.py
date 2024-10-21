@@ -186,5 +186,5 @@ def main():
         logging.info(f"File decrypted to: {output_file}")
 
 
-#if __name__ == "__main__":
-    #main()
+if __name__ == "__main__":
+    main()
