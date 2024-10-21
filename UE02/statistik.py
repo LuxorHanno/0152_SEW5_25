@@ -64,7 +64,30 @@ def countCommits(parsed_commits):
     return commit_counts
 
 
+def makePlot(commit_counts, author, filename):
+    weekdays = []
+    hours = []
+    sizes = []
 
+    for (weekday, hour), count in commit_counts.items():
+        weekdays.append(weekday)
+        hours.append(hour)
+        sizes.append(count * 50)
+
+    plt.xlabel('Uhrzeit')
+    plt.ylabel('Wochentag')
+    plt.title(f'{author}: {sum(commit_counts.values())} commits')
+    plt.xlim(-0.5, 24)
+    plt.ylim(-0.5, 6.5)
+    plt.yticks(ticks=[0, 1, 2, 3, 4, 5, 6], labels=['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'])
+    plt.xticks(range(0, 24, 2))
+    plt.figure(figsize=(10, 6), dpi=100)
+    plt.scatter(hours, weekdays, s=sizes, alpha=0.5)
+    plt.grid(True)
+
+    if filename:
+        plt.savefig(filename, dpi=72)
+    plt.show()
 
 def main():
     parser = argparse.ArgumentParser(
