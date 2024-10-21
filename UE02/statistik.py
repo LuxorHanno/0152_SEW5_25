@@ -9,6 +9,62 @@ import sys
 from collections import defaultdict
 from matplotlib import pyplot as plt
 
+def getGitLog(author, path, verbose):
+    gc = ['git']
+
+    if path:
+        gc.extend(['-C', path])
+
+    gc.extend(['log', '--pretty=%an;%ad-le-', '--date=rfc'])
+
+    if author:
+        gc.append(f'--author={author}')
+
+    if verbose:
+        print(f"Running command: {''.join(gc)}")
+
+    try:
+        process = subprocess.Popen(gc, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+
+        if process.returncode != 0:
+            print(f"Error running git log: {stderr.decode('utf-8')}")
+            sys.exit(1)
+
+        return stdout.decode('utf-8')
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        sys.exit(1)
+
+def parseGitLog(output):
+    commits = output.split('-le-')
+    parsedCommits = []
+
+    for commit in commits:
+        if commit.strip():
+            author, date = commit.split(';')
+            parsedCommits.append({'author': author.strip(), 'date': date.strip()})
+
+    return parsedCommits
+
+def countCommits(parsed_commits):
+    commit_counts = {}
+
+    for commit in parsed_commits:
+        commit_date = parser.parse(commit['date'])
+        weekday = commit_date.weekday()
+        hour = commit_date.hour
+        key = (weekday, hour)
+
+        if key not in commit_counts:
+            commit_counts[key] = 0
+
+        commit_counts[key] += 1
+
+    return commit_counts
+
+
+
 
 def main():
     parser = argparse.ArgumentParser(
