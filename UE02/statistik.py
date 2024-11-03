@@ -1,6 +1,10 @@
-__author__ = "Hanno Postl"
-__version__ = "1.0"
-__status__ = "finished"
+"""
+Author: Hanno Postl
+Version: 1.0
+Status: finished
+
+This script processes git log data to generate a plot showing the distribution of commits over weekdays and hours.
+"""
 
 import argparse
 from dateutil import parser
@@ -10,6 +14,17 @@ from collections import defaultdict
 from matplotlib import pyplot as plt
 
 def getGitLog(author, path, verbose):
+    """
+    Retrieves git log data.
+
+    Parameters:
+    author (str): The author to filter the commits.
+    path (str): The directory of the git repository.
+    verbose (bool): If True, prints the git command being run.
+
+    Returns:
+    str: The git log output.
+    """
     gc = ['git']
 
     if path:
@@ -28,8 +43,8 @@ def getGitLog(author, path, verbose):
         stdout, stderr = process.communicate()
 
         if process.returncode != 0:
-            print(f"Error running git log: {stderr.decode('utf-8')}")
-            sys.exit(1)
+            print(f"!!Error!! running git log: {stderr.decode('utf-8')}")
+            sys.exit(process.returncode)
 
         return stdout.decode('utf-8')
     except Exception as e:
@@ -37,6 +52,15 @@ def getGitLog(author, path, verbose):
         sys.exit(1)
 
 def parseGitLog(output):
+    """
+    Parses the git log output.
+
+    Parameters:
+    output (str): The git log output.
+
+    Returns:
+    list: A list of dictionaries with 'author' and 'date' keys.
+    """
     commits = output.split('-le-')
     parsedCommits = []
 
@@ -48,6 +72,15 @@ def parseGitLog(output):
     return parsedCommits
 
 def countCommits(parsed_commits):
+    """
+    Counts the number of commits per weekday and hour.
+
+    Parameters:
+    parsed_commits (list): A list of parsed commits.
+
+    Returns:
+    dict: A dictionary with (weekday, hour) as keys and commit counts as values.
+    """
     commit_counts = {}
 
     for commit in parsed_commits:
@@ -63,8 +96,15 @@ def countCommits(parsed_commits):
 
     return commit_counts
 
-
 def makePlot(commit_counts, author, filename):
+    """
+    Generates and saves a plot of commit counts.
+
+    Parameters:
+    commit_counts (dict): A dictionary with (weekday, hour) as keys and commit counts as values.
+    author (str): The author of the commits.
+    filename (str): The filename to save the plot.
+    """
     weekdays = []
     hours = []
     sizes = []
@@ -74,6 +114,8 @@ def makePlot(commit_counts, author, filename):
         hours.append(hour)
         sizes.append(count * 50)
 
+    plt.figure(figsize=(10, 6), dpi=100)
+    plt.scatter(hours, weekdays, s=sizes, alpha=0.5)
     plt.xlabel('Uhrzeit')
     plt.ylabel('Wochentag')
     plt.title(f'{author}: {sum(commit_counts.values())} commits')
@@ -81,15 +123,16 @@ def makePlot(commit_counts, author, filename):
     plt.ylim(-0.5, 6.5)
     plt.yticks(ticks=[0, 1, 2, 3, 4, 5, 6], labels=['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'])
     plt.xticks(range(0, 24, 2))
-    plt.figure(figsize=(10, 6), dpi=100)
-    plt.scatter(hours, weekdays, s=sizes, alpha=0.5)
+
     plt.grid(True)
 
-    if filename:
-        plt.savefig(filename, dpi=72)
+    plt.savefig(filename, dpi=72)
     plt.show()
 
 def main():
+    """
+    Main function to parse arguments, retrieve git log data, and generate the plot.
+    """
     parser = argparse.ArgumentParser(
         description="statistik.py by Hanno Postl 5CN -- draws a plot with git log data"
     )
@@ -122,24 +165,20 @@ def main():
 
     args = parser.parse_args()
 
-    # Git log Daten abrufen
     output = getGitLog(args.author, args.directory, args.verbose)
 
     if not output:
         print("Keine Commits gefunden.", file=sys.stderr)
         sys.exit(1)
 
-    # Daten parsen
     parsed_commits = parseGitLog(output)
 
-    # Ergebnisse ausgeben
     for commit in parsed_commits:
         print(f"{commit['author']}; {commit['date']}")
 
     print(f"Anzahl der Commits: {len(parsed_commits)}")
 
     makePlot(countCommits(parsed_commits), args.author, args.filename)
-
 
 if __name__ == "__main__":
     main()

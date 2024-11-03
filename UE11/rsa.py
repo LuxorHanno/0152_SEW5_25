@@ -75,6 +75,7 @@ def ints2file(filename, ints, bytelength):
     """
     with open(filename, "ab") as file:
         for i in ints:
+            print(i)
             byte_data = i.to_bytes(bytelength, byteorder="big")
             file.write(byte_data)
 
@@ -87,7 +88,7 @@ def encryptFile(clearfile, cryptfile, public_key):
     """
     with open(cryptfile, "w") as file:
         file.write("")
-    remove_null_characters(clearfile)
+    #remove_null_characters(clearfile)
     for i in file2ints(clearfile, public_key[1].bit_length() // 8):
         ints2file(cryptfile, [pow(i, public_key[0], public_key[1])], public_key[1].bit_length() // 8)
 

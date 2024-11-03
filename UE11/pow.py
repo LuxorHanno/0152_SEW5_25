@@ -11,6 +11,9 @@ def my_pow(a, b, n):
     :param b: Exponent
     :param n: Modulo
     :return: Ergebnis der Berechnung
+    >>> my_pow(7,5,13)
+    11
+
     """
     result = 1
     a = a % n
@@ -40,7 +43,7 @@ if __name__ == "__main__":
     start = time.time()
     print(my_pow(a, b, n))
     end = time.time()
-    print("Custom my_pow() time: ", 1000000 * (end - start))
+    print("Custom my_pow() time: ", 1000 * (end - start))
 
     """
     #Testen mir a**b%n
