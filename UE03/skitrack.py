@@ -175,12 +175,20 @@ def main() -> None:
         print('Dateiformat nicht unterstützt')
         return
 
-    print("Niedrigster Punkt: ", min(data, key=lambda x: float(x[3]))[3])
-    print("Höchster Punkt: ", max(data, key=lambda x: float(x[3]))[3])
-    print("Anzahl der Punkte: ", len(data))
+    if not args.quiet:
+        print("Niedrigster Punkt: ", min(data, key=lambda x: float(x[3]))[3])
+        print("Höchster Punkt: ", max(data, key=lambda x: float(x[3]))[3])
+        print("Anzahl der Punkte: ", len(data))
+
+    if args.verbose:
+        print("Startpunkt: ", data[0])
+        print("Endpunkt: ", data[-1])
+
 
     # Write data to csv-file
     if args.out:
+        if args.verbose:
+            print("Output - Datei: ", args.out)
         if args.out.split('.')[-1] == 'csv':
             with open(args.out, 'w') as f:
                 writer = csv.writer(f)
