@@ -1,6 +1,6 @@
 __author__ = "Hanno Postl"
-__version__ = "1.1"
-__status__ = "work in progress"
+__version__ = "1.3"
+__status__ = "Finished"
 
 import argparse
 import csv
@@ -100,7 +100,16 @@ def makePlot(data: List[List[str]], marker: bool, dot: Optional[str], connect: b
     if connect:
         plt.plot(x, y, color=line_color, alpha=0.5)
     if marker:
-        plt.scatter([x[0], x[-1]], [y[0], y[-1]], color="red", marker="x")
+        plt.scatter(x[0], y[0], color="green", marker="o")
+        plt.annotate('Start',
+                     xy=(x[0], y[0]), xycoords='data',
+                     xytext=(+20, +20), textcoords='offset points', fontsize=10,
+                     arrowprops=dict(facecolor='blue', shrink=0.01))
+        plt.scatter(x[-1], y[-1], color="red", marker="o")
+        plt.annotate('Ende',
+                     xy=(x[-1], y[-1]), xycoords='data',
+                     xytext=(+20, +20), textcoords='offset points', fontsize=10,
+                     arrowprops=dict(facecolor='blue', shrink=0.01))
 
     if not filename:
         filename = "untitled"
