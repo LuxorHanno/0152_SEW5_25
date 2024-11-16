@@ -17,6 +17,20 @@ parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose
 parser.add_argument("-q", "--quiet", action="store_true", help="Enable quiet logging")
 args = parser.parse_args()
 
+# Logging configuration
+log_file = "./output/create_class.log"
+os.makedirs("./output", exist_ok=True)
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG if args.verbose else logging.WARNING if args.quiet else logging.INFO)
+
+handler = RotatingFileHandler(log_file, maxBytes=10000, backupCount=5)
+handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+logger.addHandler(handler)
+
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+logger.addHandler(console_handler)
 
 
 # Functions for username normalization and password generation
@@ -88,3 +102,8 @@ with open(add_script_path, "w") as add_script, open(del_script_path, "w") as del
 
         csv_data.append({"Username": username, "Password": password, "Home": home_dir})
 
+# Save CSV
+csv_df = pd.DataFrame(csv_data)
+csv_df.to_csv(csv_path, index=False)
+
+logger.info("Scripts class_add.sh, class_del.sh, and class.csv successfully created.")
