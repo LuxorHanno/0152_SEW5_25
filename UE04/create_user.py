@@ -9,6 +9,7 @@ from logging.handlers import RotatingFileHandler
 # Argument parser setup
 parser = argparse.ArgumentParser(description="Create user accounts from an Excel file.")
 parser.add_argument("input_file", help="Path to the input Excel file")
+parser.add_argument("-o", "--output", choices=["csv", "xlsx"], default="csv", help="Output format: csv or xlsx")
 parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
 parser.add_argument("-q", "--quiet", action="store_true", help="Enable quiet logging")
 args = parser.parse_args()
@@ -49,7 +50,7 @@ except FileNotFoundError:
 
 # Prepare script contents
 add_script_path = "./output/user_add.sh"
-csv_path = "./output/user.csv"
+output_path = f"./output/user.{args.output}"
 
 usernames = {}
 with open(add_script_path, "w") as add_script:
@@ -81,8 +82,11 @@ with open(add_script_path, "w") as add_script:
 
         logger.debug(f"Created user {username} with password {password} and home directory {home_dir} for last name {last_name}.")
 
-# Save CSV
+# Save output
 csv_df = pd.DataFrame(csv_data)
-csv_df.to_csv(csv_path, index=False)
+if args.output == "csv":
+    csv_df.to_csv(output_path, index=False)
+else:
+    csv_df.to_excel(output_path, index=False)
 
-logger.info("Script user_add.sh and user.csv successfully created.")
+logger.info(f"Script user_add.sh and user.{args.output} successfully created.")
