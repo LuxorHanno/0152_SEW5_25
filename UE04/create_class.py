@@ -1,6 +1,6 @@
 __author__ = "Hanno Postl"
-__version__ = "1.0"
-__status__ = "under construction"
+__version__ = "1.3"
+__status__ = "Finished"
 
 import pandas as pd
 import unicodedata
