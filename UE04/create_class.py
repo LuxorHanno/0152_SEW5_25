@@ -35,10 +35,10 @@ logger.addHandler(console_handler)
 
 # Functions for username normalization and password generation
 def normalize_username(name: str) -> str:
-    name = unicodedata.normalize("NFD", name)
-    name = ''.join(c for c in name if not unicodedata.combining(c))
     name = name.replace('ä', 'ae').replace('ö', 'oe').replace('ü', 'ue').replace('ß', 'ss')
     name = name.lower().replace(" ", "_")
+    name = unicodedata.normalize("NFD", name)
+    name = ''.join(c for c in name if not unicodedata.combining(c))
     return ''.join(c for c in name if c.isalnum() or c == "_")
 
 def generate_password(class_name, room_number, advisor) -> str:
