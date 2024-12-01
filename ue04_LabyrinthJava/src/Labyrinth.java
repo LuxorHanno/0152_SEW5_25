@@ -7,11 +7,11 @@ import java.util.Arrays;
 import static java.lang.String.valueOf;
 
 /**
- *Solve a Maze with Java
- *@author Hanno Postl
+ * Solve a Maze with Java
+ * @author Hanno Postl
  */
-
 public class Labyrinth {
+    // Predefined maps for the labyrinth
     public static String[][] maps = {{
             "############",
             "#  #     # #",
@@ -70,37 +70,37 @@ public class Labyrinth {
     }};
 
     /**
-     * Wandelt (unveränderliche) Strings in Char-Arrays
-     * @param map  der Plan, ein String je Zeile
-     * @return char[][] des Plans
+     * Converts immutable strings to char arrays
+     * @param map the plan, a string per line
+     * @return char[][] representation of the plan
      */
     public static char[][] fromStrings(String[] map) {
         return Arrays.stream(map).map(String::toCharArray).toArray(char[][]::new);
     }
 
-
     /**
-     * Ausgabe des Layrinths
-     * @param lab
+     * Prints the labyrinth
+     * @param lab the labyrinth to print
      */
     public static void printLabyrinth(char[][] lab) {
         Arrays.stream(lab).forEach(line -> System.out.println(valueOf(line)));
     }
 
     /**
-     * Sucht, ob ein Weg aus dem Labyrinth führt
-     * @param zeile     aktuelle Position
-     * @param spalte     aktuelle Position
-     * @param lab     Labyrinth
-     * @throws InterruptedException    für die verlangsamte Ausgabe mit sleep()
+     * Searches for a way out of the labyrinth
+     * @param zeile current row position
+     * @param spalte current column position
+     * @param lab the labyrinth
+     * @return true if a way out is found, false otherwise
+     * @throws InterruptedException for delayed output with sleep()
      */
     public static boolean suchen(int zeile, int spalte, char[][] lab) throws InterruptedException {
         if (lab[zeile][spalte] == 'A'){
-        return true;
+            return true;
         }
 
-		if (lab[zeile][spalte] == '#' || lab[zeile][spalte] == '.'){
-        return false;
+        if (lab[zeile][spalte] == '#' || lab[zeile][spalte] == '.'){
+            return false;
         }
 
         lab[zeile][spalte] = '.';
@@ -113,21 +113,20 @@ public class Labyrinth {
                 suchen(zeile, spalte-1, lab) ||
                 suchen(zeile-1, spalte, lab);
 
-        lab [zeile][spalte] = ' ';
+        lab[zeile][spalte] = ' ';
 
         return hit;
     }
 
     /**
-     * Ermittelt die Anzahl der Wege, die aus dem Labyrinth führen
-     * @param zeile     aktuelle Position
-     * @param spalte     aktuelle Position
-     * @param lab     Labyrinth
-     * @return anzahl Anzahl der unterschiedlichen Wege, die aus dem Labyrinth führen (ein bereits besuchtes Feld darf nicht nochmals betreten werden)
-     * @throws InterruptedException    für die verlangsamte Ausgabe mit sleep()
+     * Determines the number of ways out of the labyrinth
+     * @param zeile current row position
+     * @param spalte current column position
+     * @param lab the labyrinth
+     * @return number of different ways out of the labyrinth (a previously visited field cannot be entered again)
+     * @throws InterruptedException for delayed output with sleep()
      */
     public static int alleSuchen(int zeile, int spalte, char[][] lab) throws InterruptedException {
-
         if (lab[zeile][spalte] == 'A'){
             return 1;
         }
@@ -146,7 +145,7 @@ public class Labyrinth {
                 alleSuchen(zeile, spalte-1, lab) +
                 alleSuchen(zeile-1, spalte, lab);
 
-        lab [zeile][spalte] = ' ';
+        lab[zeile][spalte] = ' ';
 
         return hits;
     }
