@@ -1,3 +1,7 @@
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 import static java.lang.String.valueOf;
@@ -147,9 +151,19 @@ public class Labyrinth {
         return hits;
     }
 
+    /**
+     * Get a labyrinth from a file
+     * @param path Path to a file
+     * @return Labyrinth in char[][] format
+     * @throws IOException IO error
+     */
+    public static char[][] labFromFile(Path path) throws IOException {
+        return fromStrings(Files.readAllLines(path).toArray(String[]::new));
+    }
 
-    public static void main(String[] args) throws InterruptedException {
-        char[][] labyrinth = fromStrings(maps[2]);
+    public static void main(String[] args) throws InterruptedException, IOException {
+        //char[][] labyrinth = fromStrings(maps[2]);
+        char[][] labyrinth = labFromFile(Path.of("/home/hanno/IdeaProjects/0152_SEW5_25/ue04_LabyrinthJava/src/l3.txt"));
         printLabyrinth(labyrinth);
         System.out.println("Ausgang gefunden: " + (suchen(5, 5, labyrinth) ? "ja" : "nein"));
         System.out.println("Anzahl Wege: " + alleSuchen(5, 5, labyrinth));
