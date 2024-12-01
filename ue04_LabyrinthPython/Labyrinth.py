@@ -1,6 +1,6 @@
 __author__ = "Hanno Postl"
-__version__ = "1.0"
-__status__ = "under construction"
+__version__ = "1.1"
+__status__ = "Finished"
 
 from argparse import ArgumentParser
 from time import sleep, perf_counter_ns
