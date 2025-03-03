@@ -142,6 +142,49 @@ def data_entropy(labels: List[Any]) -> float:
     probabilities = class_probabilities(labels)
     return entropy(probabilities)
 
+def partition_entropy(subsets: List[List[Any]]) -> float:
+    """
+    Calculate the entropy of a partition of subsets.
+
+    Parameters:
+    subsets (List[List[Any]]): A list of subsets.
+
+    Returns:
+    float: The entropy value of the partition.
+
+    >>> partition_entropy([["Huhn"]])
+    0.0
+    >>> partition_entropy([["Huhn"],["Kuh"]])
+    0.0
+    >>> partition_entropy([["Huhn"],["Kuh","Katze","Egel","Gelse","Spinne","Biene","Wanze"]])
+    2.456435556800403
+    >>> partition_entropy([["ja"],["ja","nein","etwas"],["nein","nein", "nein"]])
+    0.6792696431662097
+    >>> partition_entropy([["ja"],["etwas","etwas","etwas"],["nein","nein", "nein"]])
+    0.0
+    """
+    total_count = sum(len(subset) for subset in subsets)
+    return sum((len(subset) / total_count) * data_entropy(subset) for subset in subsets)
+
+def partition_entropy_by(inputs: List[Any], attribute: str, label_attribute: str) -> float:
+    """
+    Calculate the entropy of a partition of inputs by the specified attribute.
+
+    Parameters:
+    inputs (List[Any]): The list of inputs to partition.
+    attribute (str): The attribute to partition by.
+    label_attribute (str): The attribute to use for calculating entropy.
+
+    Returns:
+    float: The entropy value of the partition.
+
+    >>> inputs = readfile("res/candidates.csv")
+    >>> partition_entropy_by(inputs, 'htl', 'erfolgreich')
+    0.8885860757148735
+    """
+    partitions = partition_by(inputs, attribute)
+    labels = [[getattr(input, label_attribute) for input in partition] for partition in partitions.values()]
+    return partition_entropy(labels)
 
 # Example usage
 if __name__ == "__main__":
