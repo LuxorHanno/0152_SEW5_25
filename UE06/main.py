@@ -180,14 +180,35 @@ def partition_entropy_by(inputs: List[Any], attribute: str, label_attribute: str
 
     >>> inputs = readfile("res/candidates.csv")
     >>> partition_entropy_by(inputs, 'htl', 'erfolgreich')
-    0.8885860757148735
+    0.8885860757148734
     """
     partitions = partition_by(inputs, attribute)
     labels = [[getattr(input, label_attribute) for input in partition] for partition in partitions.values()]
     return partition_entropy(labels)
 
+def get_partition_min_entropy(inputs: List[Any],
+    attributes: List[str],
+    label_attribute: str) -> tuple[str, float]:
+    """
+    >>> inputs = readfile("res/candidates.csv")
+    >>> get_partition_min_entropy(inputs, ['anfangsbuchstabe', 'puenktlich', 'htl', 'sprache'],'erfolgreich')
+    ('puenktlich', 0.5290646583521217)
+    """
+    min_entropy = float('inf')
+    best_attribute = None
+
+    for attribute in attributes:
+        entropy_value = partition_entropy_by(inputs, attribute, label_attribute)
+        if entropy_value < min_entropy:
+            min_entropy = entropy_value
+            best_attribute = attribute
+
+    return best_attribute, min_entropy
+
 # Example usage
 if __name__ == "__main__":
+
+    draw_entropy()
     # Read the candidates from the CSV file
     candidates = readfile('res/candidates.csv')
 
