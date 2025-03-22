@@ -1,5 +1,5 @@
 __author__ = "Hanno Postl"
-__version__ = "1.1"
+__version__ = "1.4"
 __status__ = "WIP"
 
 import csv
@@ -9,6 +9,7 @@ from typing import List, Optional, TypeVar, NamedTuple, Dict, Any
 
 import matplotlib.pyplot as plt
 import numpy as np
+from pip._internal.resolution.resolvelib import candidates
 
 
 # Define the Candidate class
@@ -186,9 +187,7 @@ def partition_entropy_by(inputs: List[Any], attribute: str, label_attribute: str
     labels = [[getattr(input, label_attribute) for input in partition] for partition in partitions.values()]
     return partition_entropy(labels)
 
-def get_partition_min_entropy(inputs: List[Any],
-    attributes: List[str],
-    label_attribute: str) -> tuple[str, float]:
+def get_partition_min_entropy(inputs: List[Any], attributes: List[str], label_attribute: str) -> tuple[str, float]:
     """
     >>> inputs = readfile("res/candidates.csv")
     >>> get_partition_min_entropy(inputs, ['anfangsbuchstabe', 'puenktlich', 'htl', 'sprache'],'erfolgreich')
@@ -205,10 +204,72 @@ def get_partition_min_entropy(inputs: List[Any],
 
     return best_attribute, min_entropy
 
+
+from typing import NamedTuple, Union, Any
+
+class Leaf(NamedTuple):
+    value: Any
+
+class Split(NamedTuple):
+    attribute: str
+    subtrees: dict
+    default_value: Any = None
+
+DecisionTree = Union[Leaf, Split]
+
+
+
+def classify(tree: DecisionTree, input: Any) -> Any:
+    """Klassifiziert den Input anhand des gegebenen Entscheidungsbaums"""
+    # Wenn es ein Blatt ist, gib seinen Wert zurück
+    if isinstance(tree, Leaf):
+        return tree.value
+    # Sonst besteht dieser Baum aus einem Attribut, auf das aufgeteilt werden soll
+    # und ein Dictionary, dessen Schlüssel Werte dieses Attributs sind
+    # und dessen Werte sind die nächsten zu betrachtenden Teilbäume
+
+    subtree_key = getattr(input, tree.attribute)
+    print(subtree_key)
+    if subtree_key not in tree.subtrees:  # Falls es keinen Unterbaum für den Key gibt
+        return tree.default_value  # gib den Standardwert zurück
+
+    subtree = tree.subtrees[subtree_key]  # Wähle den passenden Unterbaum aus
+    return classify(subtree, input)  # und klassifiziere den Input damit
+
+'''def build_tree_id3(inputs: List[Any],
+    split_attributes: List[str],
+    target_attribute: str) -> DecisionTree:
+    """Generiert mit dem ID3-Algorithmus einen Entscheidungsbaum aus den Inputs"""
+    # Zähle die Häufigkeit der Zielattribute
+    label_counts = Counter(getattr(input, target_attribute)
+    for input in inputs)
+    most_common_label =
+    # Falls es nur ein einziges Label gibt, gib dieses zurück
+    if
+    # Falls keine Attribute mehr zum Aufteilen übrig sind, gib das häufigste Label zurück
+    if not split_attributes:
+        ...
+    # Sonst teile nach dem besten Attribut auf:
+    def split_entropy(attribute: str) -> float:
+        """Hilfsfunktion zum Finden das besten Attributs"""
+        return partition_entropy_by(inputs, attribute, target_attribute)
+    best_attribute = min(split_attributes, key=split_entropy)
+    partitions = partition_by(inputs, best_attribute)
+    new_attributes = [a for a in split_attributes if a != best_attribute]
+    # Unterbäume rekursiv aufbauen
+    subtrees = {attribute_value: build_tree_id3(subset,
+                                                new_attributes,
+                                                target_attribute)
+                for attribute_value, subset in partitions.items()}
+    return Split(best_attribute, subtrees, default_value=most_common_label)'''
+
+
+
+
 # Example usage
 if __name__ == "__main__":
 
-    draw_entropy()
+    """    draw_entropy()
     # Read the candidates from the CSV file
     candidates = readfile('res/candidates.csv')
 
@@ -219,4 +280,23 @@ if __name__ == "__main__":
     for key, value in partitioned_by_sprache.items():
         print(f"{key}: {value}")
 
-    # Print Graph of Entropy  # draw_entropy()
+    # Print Graph of Entropy  # draw_entropy()"""
+    # Beispiel-Entscheidungsbaum
+    recruiting_tree = Split('sprache', {
+        'Java': Split('htl', {
+            True: Leaf(True),
+            False: Leaf(False)
+        }),
+        'Whitespace': Leaf(False),
+        'Python': Split('puenktlich', {
+            False: Leaf(False),
+            True: Leaf(True)
+        })
+    })
+
+
+    input_candidate = Candidate(anfangsbuchstabe='a', sprache='Whitespace', htl=True, puenktlich=True)
+
+    # Klassifizierung des Eingabewerts
+    result = classify(recruiting_tree, input_candidate)
+    print(result)  # Ausgabe: True
