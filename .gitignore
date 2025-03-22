@@ -18,3 +18,11 @@
 /UE01/postl2.png
 /UE01/postlplot.png
 /requirements.txt
+UE04/output/class.csv
+UE04/output/class_add.sh
+UE04/output/class_del.sh
+UE04/output/create_class.log
+UE04/output/create_user.log
+UE04/output/user.csv
+UE04/output/user.xlsx
+UE06/out.csv
