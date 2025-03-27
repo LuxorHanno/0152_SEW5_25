@@ -1,6 +1,6 @@
 __author__ = "Hanno Postl"
-__version__ = "1.5"
-__status__ = "WIP"
+__version__ = "1.6"
+__status__ = "Finished"
 
 import argparse
 import csv
@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-# Define the Candidate class
+# Definiere die Klasse Candidate
 class Candidate(NamedTuple):
     anfangsbuchstabe: str
     puenktlich: bool
@@ -22,11 +22,11 @@ class Candidate(NamedTuple):
     erfolgreich: Optional[bool] = None
 
 
-# Define a generic type variable
+# Definiere einen generischen Typ
 T = TypeVar('T')
 
 
-# Function to read the CSV file and return a list of Candidate instances
+# Funktion zum Einlesen der CSV-Datei und Rückgabe einer Liste von Candidate-Instanzen
 def readfile(filename: str) -> List[T]:
     candidates: List[Candidate] = []
     with open(filename, 'r') as file:
@@ -42,34 +42,36 @@ def readfile(filename: str) -> List[T]:
     return candidates
 
 
+# Funktion zur Partitionierung der Eingaben basierend auf einem Attribut
 def partition_by(inputs: List[T], attribute: str) -> Dict[Any, List[T]]:
     """
-    Partition the inputs into lists based on the specified attribute (column name).
+    Partitioniere die Eingaben in Listen basierend auf dem angegebenen Attribut (Spaltenname).
 
     Parameters:
-    inputs (List[T]): The list of inputs to partition.
-    attribute (str): The attribute to partition by.
+    inputs (List[T]): Die Liste der Eingaben, die partitioniert werden sollen.
+    attribute (str): Das Attribut, nach dem partitioniert werden soll.
 
     Returns:
-    Dict[Any, List[T]]: A dictionary where the keys are unique values of the attribute
-                        and the values are lists of inputs with that attribute value.
+    Dict[Any, List[T]]: Ein Dictionary, dessen Schlüssel die eindeutigen Werte des Attributs sind
+                        und dessen Werte Listen von Eingaben mit diesem Attributswert enthalten.
     """
     partitions: Dict[Any, List[T]] = defaultdict(list)
     for input in inputs:
-        key = getattr(input, attribute)  # Get the value of the specified attribute
-        partitions[key].append(input)  # Add the input to the corresponding list
+        key = getattr(input, attribute)  # Hole den Wert des angegebenen Attributs
+        partitions[key].append(input)  # Füge die Eingabe der entsprechenden Liste hinzu
     return partitions
 
 
+# Funktion zur Berechnung der Entropie einer Liste von Klassenwahrscheinlichkeiten
 def entropy(class_probabilities: List[float]) -> float:
     """
-    Calculate the entropy of a list of class probabilities.
+    Berechnet die Entropie einer Liste von Klassenwahrscheinlichkeiten.
 
     Parameters:
-    class_probabilities (List[float]): A list of probabilities for each class.
+    class_probabilities (List[float]): Eine Liste von Wahrscheinlichkeiten für jede Klasse.
 
     Returns:
-    float: The entropy value.
+    float: Der Entropiewert.
 
     >>> entropy([0.0])
     0.0
@@ -85,16 +87,17 @@ def entropy(class_probabilities: List[float]) -> float:
     return float(-sum(p * math.log2(p) for p in class_probabilities if p > 0)) + 0.0
 
 
+# Funktion zum Zeichnen der Entropiefunktion
 def draw_entropy():
     """
-    Draw the graph of the entropy function H(p) = -p * log2(p) over the interval [0, 1].
+    Zeichne den Graphen der Entropiefunktion H(p) = -p * log2(p) im Intervall [0, 1].
     """
     p_values = np.linspace(0, 1, 500)
     entropy_values = [-p * np.log2(p) if p > 0 else 0 for p in p_values]
 
     plt.figure(figsize=(8, 6))
     plt.plot(p_values, entropy_values, label=r'$H(p) = -p \cdot \log_2(p)$')
-    plt.title('Entropy Function')
+    plt.title('Entropiefunktion')
     plt.xlabel('p')
     plt.ylabel('H(p)')
     plt.grid(True)
@@ -102,15 +105,16 @@ def draw_entropy():
     plt.show()
 
 
+# Funktion zur Berechnung der relativen Häufigkeit jeder Klasse
 def class_probabilities(labels: List[Any]) -> List[float]:
     """
-    Calculate the relative frequency of each class in the given list of labels.
+    Berechnet die relative Häufigkeit jeder Klasse in der gegebenen Liste von Labels.
 
     Parameters:
-    labels (List[Any]): A list of labels.
+    labels (List[Any]): Eine Liste von Labels.
 
     Returns:
-    List[float]: A list of relative frequencies of each class.
+    List[float]: Eine Liste von relativen Häufigkeiten jeder Klasse.
 
     >>> class_probabilities([1])
     [1.0]
@@ -124,15 +128,16 @@ def class_probabilities(labels: List[Any]) -> List[float]:
     return [count[label] / total_count for label in count]
 
 
+# Funktion zur Berechnung der Entropie der gegebenen Labels
 def data_entropy(labels: List[Any]) -> float:
     """
-    Calculate the entropy of the given labels.
+    Berechnet die Entropie der gegebenen Labels.
 
     Parameters:
-    labels (List[Any]): A list of labels.
+    labels (List[Any]): Eine Liste von Labels.
 
     Returns:
-    float: The entropy value.
+    float: Der Entropiewert.
 
     >>> data_entropy(["Huhn"])
     0.0
@@ -145,15 +150,16 @@ def data_entropy(labels: List[Any]) -> float:
     return entropy(probabilities)
 
 
+# Funktion zur Berechnung der Entropie einer Partition von Subsets
 def partition_entropy(subsets: List[List[Any]]) -> float:
     """
-    Calculate the entropy of a partition of subsets.
+    Berechnet die Entropie einer Partition von Subsets.
 
     Parameters:
-    subsets (List[List[Any]]): A list of subsets.
+    subsets (List[List[Any]]): Eine Liste von Subsets.
 
     Returns:
-    float: The entropy value of the partition.
+    float: Der Entropiewert der Partition.
 
     >>> partition_entropy([["Huhn"]])
     0.0
@@ -170,17 +176,18 @@ def partition_entropy(subsets: List[List[Any]]) -> float:
     return sum((len(subset) / total_count) * data_entropy(subset) for subset in subsets)
 
 
+# Funktion zur Berechnung der Entropie einer Partition der Eingaben nach einem Attribut
 def partition_entropy_by(inputs: List[Any], attribute: str, label_attribute: str) -> float:
     """
-    Calculate the entropy of a partition of inputs by the specified attribute.
+    Berechnet die Entropie einer Partition der Eingaben nach dem angegebenen Attribut.
 
     Parameters:
-    inputs (List[Any]): The list of inputs to partition.
-    attribute (str): The attribute to partition by.
-    label_attribute (str): The attribute to use for calculating entropy.
+    inputs (List[Any]): Die Liste der Eingaben, die partitioniert werden sollen.
+    attribute (str): Das Attribut, nach dem partitioniert werden soll.
+    label_attribute (str): Das Attribut, das für die Berechnung der Entropie verwendet wird.
 
     Returns:
-    float: The entropy value of the partition.
+    float: Der Entropiewert der Partition.
 
     >>> inputs = readfile("res/candidates.csv")
     >>> partition_entropy_by(inputs, 'htl', 'erfolgreich')
@@ -191,6 +198,7 @@ def partition_entropy_by(inputs: List[Any], attribute: str, label_attribute: str
     return partition_entropy(labels)
 
 
+# Funktion zur Bestimmung des Attributs mit minimaler Entropie
 def get_partition_min_entropy(inputs: List[Any], attributes: List[str], label_attribute: str) -> tuple[str, float]:
     """
     >>> inputs = readfile("res/candidates.csv")
@@ -209,10 +217,12 @@ def get_partition_min_entropy(inputs: List[Any], attributes: List[str], label_at
     return best_attribute, min_entropy
 
 
+# Klasse für Blätter im Entscheidungsbaum
 class Leaf(NamedTuple):
     value: Any
 
 
+# Klasse für Knoten im Entscheidungsbaum
 class Split(NamedTuple):
     attribute: str
     subtrees: dict
@@ -222,6 +232,7 @@ class Split(NamedTuple):
 DecisionTree = Union[Leaf, Split]
 
 
+# Funktion zur Klassifizierung eines Inputs anhand des Entscheidungsbaums
 def classify(tree: DecisionTree, input: Any) -> Any:
     """Klassifiziert den Input anhand des gegebenen Entscheidungsbaums"""
     # Wenn es ein Blatt ist, gib seinen Wert zurück
@@ -239,6 +250,7 @@ def classify(tree: DecisionTree, input: Any) -> Any:
     return classify(subtree, input)  # und klassifiziere den Input damit
 
 
+# Funktion zur Erstellung eines Entscheidungsbaums mit dem ID3-Algorithmus
 def build_tree_id3(inputs: List[Any], split_attributes: List[str], target_attribute: str) -> DecisionTree:
     """Generiert mit dem ID3-Algorithmus einen Entscheidungsbaum aus den Inputs"""
     # Zähle die Häufigkeit der Zielattribute
@@ -267,6 +279,7 @@ def build_tree_id3(inputs: List[Any], split_attributes: List[str], target_attrib
     return Split(best_attribute, subtrees, default_value=most_common_label)
 
 
+# Hauptfunktion zur Vorhersage mit einem Entscheidungsbaum
 def predict_tree():
     parser = argparse.ArgumentParser(description='Predict values using a decision tree.')
     parser.add_argument('training_file', help='CSV file with training data')
@@ -274,60 +287,60 @@ def predict_tree():
     parser.add_argument('output_file', help='CSV file to save predictions')
     args = parser.parse_args()
 
-    # Read training data
+    # Lese Trainingsdaten ein
     training_data = readfile(args.training_file)
 
-    # Get attribute names from the first data point
+    # Hole Attributnamen aus dem ersten Datensatz
     if not training_data:
-        print("Error: Training file contains no data")
+        print("Fehler: Trainingsdatei enthält keine Daten")
         sys.exit(1)
 
     attributes = list(training_data[0]._fields)
     target_attribute = attributes[-1]
     split_attributes = attributes[:-1]
 
-    # Build decision tree
+    # Erstelle Entscheidungsbaum
     tree = build_tree_id3(training_data, split_attributes, target_attribute)
 
-    # Read prediction data
+    # Lese Vorhersagedaten ein
     predict_data = readfile(args.predict_file)
 
-    # Make predictions
+    # Führe Vorhersagen durch
     results = []
     for data_point in predict_data:
-        # Create a new data point with the prediction
+        # Erstelle neuen Datensatz mit der Vorhersage
         prediction = classify(tree, data_point)
 
-        # Get all fields as a dictionary
+        # Hole alle Felder als Dictionary
         data_dict = data_point._asdict()
 
-        # Update the target attribute with the prediction
+        # Aktualisiere das Zielattribut mit der Vorhersage
         data_dict[target_attribute] = prediction
 
         results.append(data_dict)
 
-    # Write results to output file
+    # Schreibe Ergebnisse in Ausgabedatei
     with open(args.output_file, 'w', newline='') as file:
-        # Use the same delimiter as in the original files
+        # Verwende denselben Delimiter wie in den Originaldateien
         writer = csv.writer(file, delimiter=';')
 
-        # Write header row
+        # Schreibe Header-Zeile
         writer.writerow(attributes)
 
-        # Write data rows
+        # Schreibe Datenzeilen
         for data_dict in results:
             writer.writerow([data_dict[attr] for attr in attributes])
 
-    print(f"Predictions saved to {args.output_file}")
+    print(f"Vorhersagen gespeichert in {args.output_file}")
 
 
-# Example usage
+# Beispielanwendung
 if __name__ == "__main__":
     predict_tree()
 
     """
     draw_entropy()
-    # CSV File einlesen
+    # CSV-Datei einlesen
     candidates = readfile('res/candidates.csv')
 
     # Kandidaten nach dem Attribut 'sprache' partitionieren
@@ -337,8 +350,8 @@ if __name__ == "__main__":
         print(f"{key}: {value}")
 
     draw_entropy()
-    
-    # Beispiel-Entscheidungsbaum
+
+# Beispiel-Entscheidungsbaum
     recruiting_tree = Split('sprache', {
         'Java': Split('htl', {
             True: Leaf(True),
